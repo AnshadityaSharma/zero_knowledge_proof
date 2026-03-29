@@ -3,7 +3,7 @@
 A modern, full-stack, interactive cryptography demonstration. This project showcases **Zero-Knowledge Proofs (ZKP)** in cooperative multi-agent systems.
 
 Built for the **Cryptography and Network Security** presentation.
-**Team Member:** Radhika Agrawal (23BCE5021)
+**Team Members:** Radhika Agrawal (23BCE5021), Anshaditya Sharma (23BRS1204)
 
 ---
 

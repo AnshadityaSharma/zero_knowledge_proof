@@ -1,7 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const { generateNonce, generateCommitment, generateProof, verifyHMACProof, generateChallenge } = require('./crypto/zkp');
-const { simulateEnvironment, validatePathConstraints } = require('./protocol/verifier');
+const { simulateEnvironment, validatePathConstraints, findValidPath } = require('./protocol/verifier');
+
+/**
+ * Zero-Knowledge Task Verification — Backend API
+ * Contributors: Radhika Agrawal (23BCE5021), Anshaditya Sharma (23BRS1204)
+ */
 
 const app = express();
 app.use(cors());
@@ -17,18 +22,22 @@ app.get('/', (req, res) => {
 });
 
 // Step 1: Generate Task and Observer finds a hidden solution
+// Now supports custom traps via request body
 app.post('/api/generate-task', (req, res) => {
-  // Simulate an environment with start, goal, and hidden traps
-  const environment = simulateEnvironment();
+  const { customTraps } = req.body || {};
   
-  // A valid path found by the Observer (kept secret)
-  const secretPath = [
-    {x: 0, y: 0},
-    {x: 1, y: 0},
-    {x: 2, y: 0},
-    {x: 2, y: 1},
-    {x: 2, y: 2} // Goal
-  ];
+  // Simulate an environment with start, goal, and hidden traps (custom or default)
+  const environment = simulateEnvironment(customTraps);
+  
+  // Dynamically find a valid path using BFS (instead of hardcoded path)
+  const secretPath = findValidPath(environment);
+  
+  if (!secretPath) {
+    return res.status(400).json({ 
+      error: "No valid path exists with these trap positions. The maze is unsolvable!",
+      environment
+    });
+  }
   
   // Verify internally before committing
   const isValid = validatePathConstraints(secretPath, environment.traps);
@@ -55,7 +64,8 @@ app.post('/api/generate-task', (req, res) => {
     message: "Task generated. Observer has a computed hidden path.",
     commitment,
     nonce, // Returned for UI visualization only; normally kept secret by Observer until verification phase
-    environment // Send to UI for drawing the map
+    environment, // Send to UI for drawing the map
+    pathLength: secretPath.length // Send path length for UI display
   });
 });
 
@@ -81,10 +91,6 @@ app.post('/api/proof', (req, res) => {
   }
 
   // Observer generates a zero-knowledge proof response using HMAC
-  // The proof combines the original secret, the challenge, and a sequence number
-  // In a real ZKP, this would be a transcript or polynomial evaluation
-  // Here we use Fiat-Shamir heuristic inspired HMAC to simulate the non-interactive conversion
-  // We use HMAC-SHA256 of the path + challenge to prove knowledge
   const proof = generateProof(currentTask.secretPath, currentChallenge, currentTask.timestamp);
 
   res.json({
@@ -102,7 +108,6 @@ app.post('/api/verify', (req, res) => {
   }
 
   // Verifier checks constraints through cryptographic validation
-  // In simulation, we verify the HMAC signature of the proof matches expected format
   const isVerified = verifyHMACProof(proof, currentTask.secretPath, currentChallenge, currentTask.timestamp);
 
   // We ensure to add a "Constraint Verification" simulation:

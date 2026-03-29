@@ -11,13 +11,13 @@ export function LogsPanel({ logs }) {
   }, [logs]);
 
   return (
-    <div className="glass-panel logs-panel">
+    <div className="logs-panel">
       <div className="logs-header">
-        <Terminal size={18} /> Protocol Event Logs
+        <Terminal size={15} /> Protocol Logs
       </div>
       <div className="logs-content" ref={containerRef}>
         {logs.length === 0 ? (
-          <div style={{ color: 'var(--text-dim)', fontStyle: 'italic', opacity: 0.5 }}>Waiting for initialization...</div>
+          <div style={{ color: 'var(--text-muted)', fontStyle: 'italic', opacity: 0.5 }}>Waiting for initialization...</div>
         ) : (
           logs.map((log, idx) => (
              <div key={idx} className="log-item">
