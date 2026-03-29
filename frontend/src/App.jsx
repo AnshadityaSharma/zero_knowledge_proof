@@ -48,23 +48,32 @@ function App() {
     }]);
   };
 
-  const handleConfigureTraps = (traps) => {
-    setCustomTraps(traps);
-    addLog(`Traps configured: ${traps.length} positions → [${traps.map(t => `(${t.x},${t.y})`).join(', ')}]`, true);
+  const handleConfigureTraps = (config) => {
+    setCustomTraps(config);
+    if(config.start && config.goal) {
+      addLog(`Setup: Start(${config.start.x},${config.start.y}) → Goal(${config.goal.x},${config.goal.y}) with ${config.traps.length} traps`, true);
+    } else {
+      addLog(`Traps configured: ${config.length} positions`, true);
+    }
   };
 
   const handleGenerateTask = async () => {
     try {
-      const payload = customTraps ? { customTraps } : {};
+      // payload could be array of traps or an object { traps, start, goal }
+      const payload = customTraps ? (Array.isArray(customTraps) ? { customTraps } : customTraps) : {};
       const { data } = await axios.post(`${API_URL}/generate-task`, payload);
       setMapData(data.environment);
       setCryptoData(prev => ({ ...prev, commitment: data.commitment, nonce: data.nonce, verified: null, details: '' }));
-      addLog("Observer solved constraints. Generated SHA256 Commitment.");
+      addLog("Observer solved constraints using BFS algorithm. Generated SHA-256 Commitment.");
       addLog(`Path: ${data.pathLength} steps. Commitment: ${data.commitment.substring(0, 20)}...`, true);
       setStep(1);
     } catch (err) {
       const errMsg = err.response?.data?.error || "Backend unreachable. Is server running on port 5000?";
       addLog(errMsg);
+      // If environment data was sent back in error (e.g. maze blocked), update map to show it
+      if (err.response?.data?.environment) {
+         setMapData(err.response.data.environment);
+      }
     }
   };
 
@@ -188,6 +197,35 @@ function App() {
           <button onClick={handleRestart} className="reset-btn">
             <RotateCcw size={15}/> Reset Protocol
           </button>
+        </div>
+
+        {/* EXPLANATION SECTION */}
+        <div style={{marginTop: '3.5rem', padding: '2rem', background: 'var(--surface-2)', borderRadius: '16px', border: '1px solid var(--border)'}}>
+           <h3 style={{color: 'var(--text-bright)', marginBottom: '1.25rem', fontSize: '1.1rem'}}>How the Crypto Works</h3>
+           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.6}}>
+              <div>
+                <strong style={{color: 'var(--pink)', display:'block', marginBottom:'0.25rem'}}>SHA-256 (Commitment Phase)</strong>
+                The Observer hashes their path to "lock it in" without showing it. The hash acts as a one-way fingerprint.
+              </div>
+              <div>
+                <strong style={{color: 'var(--teal)', display:'block', marginBottom:'0.25rem'}}>CSPRNG (Nonce / Randomness)</strong>
+                A random number is appended to the data before hashing. This ensures the same path creates a completely unique hash every time, stopping attackers from guessing it.
+              </div>
+              <div>
+                <strong style={{color: 'var(--teal)', display:'block', marginBottom:'0.25rem'}}>BFS Algorithm (Pathfinding)</strong>
+                When generating a task, Breadth-First Search systematically navigates the grid. If it hits traps and forms no valid route, it knows mathematically there is no solution!
+              </div>
+              <div>
+                <strong style={{color: 'var(--purple)', display:'block', marginBottom:'0.25rem'}}>HMAC (ZKP Proof Phase)</strong>
+                A keyed-hash message authentication code. It allows the Observer to prove they know the original path by hashing it specifically against the Verifier's remote Challenge key.
+              </div>
+              <div style={{gridColumn: '1 / -1', marginTop: '0.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)'}}>
+                <strong style={{color: 'var(--purple)', display:'block', marginBottom:'0.25rem'}}>Live Hash Entropy Field (Visualizer)</strong>
+                <span style={{color: 'var(--text-muted)'}}>
+                  This specific "Wow Factor" visualizes the literal SHA-256 bits of the cryptographic hash. When idle or computing, particles show chaotic entropy. Upon successful Verifier authentication, the chaotic entropy pulls into a stable, glowing ring, visually proving cryptographic convergence!
+                </span>
+              </div>
+           </div>
         </div>
 
         <div className="footer-section">

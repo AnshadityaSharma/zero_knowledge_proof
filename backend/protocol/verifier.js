@@ -9,7 +9,7 @@
  */
 
 // Generate a 4x4 grid with some simulated hidden traps
-function simulateEnvironment(customTraps) {
+function simulateEnvironment(customTraps, customStart, customGoal) {
   const defaultTraps = [
     {x: 1, y: 1},
     {x: 2, y: 3},
@@ -17,11 +17,13 @@ function simulateEnvironment(customTraps) {
   ];
 
   const traps = customTraps && customTraps.length > 0 ? customTraps : defaultTraps;
+  const start = customStart || { x: 0, y: 0 };
+  const goal = customGoal || { x: 2, y: 2 };
 
   return {
     gridSize: { width: 4, height: 4 },
-    start: { x: 0, y: 0 },
-    goal: { x: 2, y: 2 },
+    start,
+    goal,
     traps
   };
 }

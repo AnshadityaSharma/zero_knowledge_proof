@@ -35,12 +35,12 @@ export function TrapConfigurator({ onConfigureTraps, disabled }) {
   const [customTraps, setCustomTraps] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
+  const [startPos, setStartPos] = useState({x:0, y:0});
+  const [goalPos, setGoalPos] = useState({x:2, y:2});
   const GRID_SIZE = 4;
-  const START = {x:0,y:0};
-  const GOAL = {x:2,y:2};
 
   const toggleCell = (x, y) => {
-    if ((x === START.x && y === START.y) || (x === GOAL.x && y === GOAL.y)) return;
+    if ((x === startPos.x && y === startPos.y) || (x === goalPos.x && y === goalPos.y)) return;
     
     const exists = customTraps.findIndex(t => t.x === x && t.y === y);
     if (exists >= 0) {
@@ -53,7 +53,7 @@ export function TrapConfigurator({ onConfigureTraps, disabled }) {
 
   const generateRandom = () => {
     const traps = [];
-    const forbidden = [`${START.x},${START.y}`, `${GOAL.x},${GOAL.y}`];
+    const forbidden = [`${startPos.x},${startPos.y}`, `${goalPos.x},${goalPos.y}`];
     const count = 2 + Math.floor(Math.random() * 3); // 2-4 traps
     while (traps.length < count) {
       const x = Math.floor(Math.random() * GRID_SIZE);
@@ -67,9 +67,14 @@ export function TrapConfigurator({ onConfigureTraps, disabled }) {
   };
 
   const applyConfig = () => {
-    const traps = mode === 'preset' ? PRESETS[selectedPreset].traps : customTraps;
-    if (traps.length === 0) return;
-    onConfigureTraps(traps);
+    let payload;
+    if (mode === 'preset') {
+      // For preset, use predefined start/goal for best experience, or keep custom
+      payload = { traps: PRESETS[selectedPreset].traps, start: {x:0,y:0}, goal: {x:2,y:2} };
+    } else {
+      payload = { traps: customTraps, start: startPos, goal: goalPos };
+    }
+    onConfigureTraps(payload);
     setIsOpen(false);
   };
 
@@ -123,21 +128,40 @@ export function TrapConfigurator({ onConfigureTraps, disabled }) {
             </div>
           ) : (
             <div className="trap-custom">
-              <p className="trap-hint">Click cells to place/remove traps (max 6). Start and Goal are locked.</p>
+              <p className="trap-hint">Set custom Start, Goal, and Traps</p>
+              
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', background: 'var(--surface-2)', padding: '0.75rem', borderRadius: '8px' }}>
+                <div style={{flex: 1}}>
+                  <label style={{display:'block', fontSize:'0.75rem', color:'var(--teal)', marginBottom:'0.25rem', fontWeight:600}}>START (x, y)</label>
+                  <div style={{display:'flex', gap:'0.25rem'}}>
+                    <input type="number" min="0" max="3" value={startPos.x} onChange={(e)=>setStartPos({...startPos, x: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
+                    <input type="number" min="0" max="3" value={startPos.y} onChange={(e)=>setStartPos({...startPos, y: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
+                  </div>
+                </div>
+                <div style={{flex: 1}}>
+                  <label style={{display:'block', fontSize:'0.75rem', color:'var(--green)', marginBottom:'0.25rem', fontWeight:600}}>GOAL (x, y)</label>
+                  <div style={{display:'flex', gap:'0.25rem'}}>
+                    <input type="number" min="0" max="3" value={goalPos.x} onChange={(e)=>setGoalPos({...goalPos, x: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
+                    <input type="number" min="0" max="3" value={goalPos.y} onChange={(e)=>setGoalPos({...goalPos, y: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
+                  </div>
+                </div>
+              </div>
+
+              <p className="trap-hint">Click cells to toggle traps (max 6):</p>
               <div className="trap-controls-row">
                 <button className="trap-action-btn" onClick={generateRandom}>
-                  <Shuffle size={14}/> Random
+                  <Shuffle size={14}/> Randomize Traps
                 </button>
                 <button className="trap-action-btn" onClick={() => setCustomTraps([])}>
-                  <Trash2 size={14}/> Clear
+                  <Trash2 size={14}/> Clear Traps
                 </button>
               </div>
               <div className="trap-grid-editor">
                 {Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, idx) => {
                   const x = idx % GRID_SIZE;
                   const y = Math.floor(idx / GRID_SIZE);
-                  const isStart = x === START.x && y === START.y;
-                  const isGoal = x === GOAL.x && y === GOAL.y;
+                  const isStart = x === startPos.x && y === startPos.y;
+                  const isGoal = x === goalPos.x && y === goalPos.y;
                   const trap = isTrap(x, y);
                   
                   let cls = 'trap-cell';
@@ -166,8 +190,14 @@ export function TrapConfigurator({ onConfigureTraps, disabled }) {
               {Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, idx) => {
                 const x = idx % GRID_SIZE;
                 const y = Math.floor(idx / GRID_SIZE);
-                const isStart = x === START.x && y === START.y;
-                const isGoal = x === GOAL.x && y === GOAL.y;
+                let isStart, isGoal;
+                if(mode === 'preset'){
+                   isStart = x === 0 && y === 0;
+                   isGoal = x === 2 && y === 2;
+                } else {
+                   isStart = x === startPos.x && y === startPos.y;
+                   isGoal = x === goalPos.x && y === goalPos.y;
+                }
                 const trap = isTrap(x, y);
                 
                 let cls = 'trap-preview-cell';

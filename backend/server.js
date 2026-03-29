@@ -24,17 +24,17 @@ app.get('/', (req, res) => {
 // Step 1: Generate Task and Observer finds a hidden solution
 // Now supports custom traps via request body
 app.post('/api/generate-task', (req, res) => {
-  const { customTraps } = req.body || {};
+  const { customTraps, start, goal } = req.body || {};
   
   // Simulate an environment with start, goal, and hidden traps (custom or default)
-  const environment = simulateEnvironment(customTraps);
+  const environment = simulateEnvironment(customTraps, start, goal);
   
   // Dynamically find a valid path using BFS (instead of hardcoded path)
   const secretPath = findValidPath(environment);
   
   if (!secretPath) {
     return res.status(400).json({ 
-      error: "No valid path exists with these trap positions. The maze is unsolvable!",
+      error: "No path possible! Evaluated all routes using Breadth-First Search (BFS) and found the goal is completely blocked.",
       environment
     });
   }
