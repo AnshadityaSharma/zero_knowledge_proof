@@ -11,7 +11,7 @@ import { TrapConfigurator } from './components/TrapConfigurator';
 import { RotateCcw } from 'lucide-react';
 import './index.css';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://zero-knowledge-proof-backend.onrender.com/api";
 
 function App() {
   const [cryptoData, setCryptoData] = useState({
