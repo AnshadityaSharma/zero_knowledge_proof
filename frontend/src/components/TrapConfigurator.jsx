@@ -96,123 +96,129 @@ export function TrapConfigurator({ onConfigureTraps, disabled }) {
 
       {isOpen && (
         <div className="trap-panel glass-panel">
-          {/* Mode Selector */}
-          <div className="trap-mode-tabs">
-            <button 
-              className={`trap-tab ${mode === 'preset' ? 'active' : ''}`}
-              onClick={() => setMode('preset')}
-            >
-              <Sparkles size={14}/> Presets
-            </button>
-            <button 
-              className={`trap-tab ${mode === 'custom' ? 'active' : ''}`}
-              onClick={() => setMode('custom')}
-            >
-              <MapPin size={14}/> Custom
-            </button>
-          </div>
-
-          {mode === 'preset' ? (
-            <div className="trap-presets">
-              {PRESETS.map((p, idx) => (
+          <div className="trap-panel-columns">
+            <div className="trap-panel-left">
+              {/* Mode Selector */}
+              <div className="trap-mode-tabs">
                 <button 
-                  key={p.name}
-                  className={`trap-preset-btn ${selectedPreset === idx ? 'selected' : ''}`}
-                  onClick={() => setSelectedPreset(idx)}
+                  className={`trap-tab ${mode === 'preset' ? 'active' : ''}`}
+                  onClick={() => setMode('preset')}
                 >
-                  <span className="preset-name">{p.name}</span>
-                  <span className="preset-desc">{p.desc}</span>
-                  <span className="preset-count">{p.traps.length} traps</span>
+                  <Sparkles size={14}/> Presets
                 </button>
-              ))}
-            </div>
-          ) : (
-            <div className="trap-custom">
-              <p className="trap-hint">Set custom Start, Goal, and Traps</p>
-              
-              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', background: 'var(--surface-2)', padding: '0.75rem', borderRadius: '8px' }}>
-                <div style={{flex: 1}}>
-                  <label style={{display:'block', fontSize:'0.75rem', color:'var(--teal)', marginBottom:'0.25rem', fontWeight:600}}>START (x, y)</label>
-                  <div style={{display:'flex', gap:'0.25rem'}}>
-                    <input type="number" min="0" max="3" value={startPos.x} onChange={(e)=>setStartPos({...startPos, x: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
-                    <input type="number" min="0" max="3" value={startPos.y} onChange={(e)=>setStartPos({...startPos, y: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
-                  </div>
-                </div>
-                <div style={{flex: 1}}>
-                  <label style={{display:'block', fontSize:'0.75rem', color:'var(--green)', marginBottom:'0.25rem', fontWeight:600}}>GOAL (x, y)</label>
-                  <div style={{display:'flex', gap:'0.25rem'}}>
-                    <input type="number" min="0" max="3" value={goalPos.x} onChange={(e)=>setGoalPos({...goalPos, x: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
-                    <input type="number" min="0" max="3" value={goalPos.y} onChange={(e)=>setGoalPos({...goalPos, y: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
-                  </div>
-                </div>
+                <button 
+                  className={`trap-tab ${mode === 'custom' ? 'active' : ''}`}
+                  onClick={() => setMode('custom')}
+                >
+                  <MapPin size={14}/> Custom
+                </button>
               </div>
 
-              <p className="trap-hint">Click cells to toggle traps (max 6):</p>
-              <div className="trap-controls-row">
-                <button className="trap-action-btn" onClick={generateRandom}>
-                  <Shuffle size={14}/> Randomize Traps
-                </button>
-                <button className="trap-action-btn" onClick={() => setCustomTraps([])}>
-                  <Trash2 size={14}/> Clear Traps
-                </button>
-              </div>
-              <div className="trap-grid-editor">
-                {Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, idx) => {
-                  const x = idx % GRID_SIZE;
-                  const y = Math.floor(idx / GRID_SIZE);
-                  const isStart = x === startPos.x && y === startPos.y;
-                  const isGoal = x === goalPos.x && y === goalPos.y;
-                  const trap = isTrap(x, y);
-                  
-                  let cls = 'trap-cell';
-                  if (isStart) cls += ' cell-start';
-                  else if (isGoal) cls += ' cell-goal';
-                  else if (trap) cls += ' cell-trap';
-                  
-                  return (
-                    <div 
-                      key={idx} 
-                      className={cls}
-                      onClick={() => mode === 'custom' && toggleCell(x, y)}
+              {mode === 'preset' ? (
+                <div className="trap-presets">
+                  {PRESETS.map((p, idx) => (
+                    <button 
+                      key={p.name}
+                      className={`trap-preset-btn ${selectedPreset === idx ? 'selected' : ''}`}
+                      onClick={() => setSelectedPreset(idx)}
                     >
-                      {isStart ? 'S' : isGoal ? 'G' : trap ? '💀' : ''}
+                      <span className="preset-name">{p.name}</span>
+                      <span className="preset-desc">{p.desc}</span>
+                      <span className="preset-count">{p.traps.length} traps</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="trap-custom">
+                  <p className="trap-hint">Set custom Start, Goal, and Traps</p>
+                  
+                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', background: 'var(--surface-2)', padding: '0.75rem', borderRadius: '8px' }}>
+                    <div style={{flex: 1}}>
+                      <label style={{display:'block', fontSize:'0.75rem', color:'var(--teal)', marginBottom:'0.25rem', fontWeight:600}}>START (x, y)</label>
+                      <div style={{display:'flex', gap:'0.25rem'}}>
+                        <input type="number" min="0" max="3" value={startPos.x} onChange={(e)=>setStartPos({...startPos, x: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
+                        <input type="number" min="0" max="3" value={startPos.y} onChange={(e)=>setStartPos({...startPos, y: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
+                      </div>
                     </div>
-                  );
-                })}
+                    <div style={{flex: 1}}>
+                      <label style={{display:'block', fontSize:'0.75rem', color:'var(--green)', marginBottom:'0.25rem', fontWeight:600}}>GOAL (x, y)</label>
+                      <div style={{display:'flex', gap:'0.25rem'}}>
+                        <input type="number" min="0" max="3" value={goalPos.x} onChange={(e)=>setGoalPos({...goalPos, x: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
+                        <input type="number" min="0" max="3" value={goalPos.y} onChange={(e)=>setGoalPos({...goalPos, y: parseInt(e.target.value)||0})} style={{width:'100%', background:'var(--surface-3)', border:'1px solid var(--border)', color:'var(--text)', borderRadius:'4px', padding:'0.25rem'}} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="trap-hint">Click cells to toggle traps (max 6):</p>
+                  <div className="trap-controls-row">
+                    <button className="trap-action-btn" onClick={generateRandom}>
+                      <Shuffle size={14}/> Randomize Traps
+                    </button>
+                    <button className="trap-action-btn" onClick={() => setCustomTraps([])}>
+                      <Trash2 size={14}/> Clear Traps
+                    </button>
+                  </div>
+                  <div className="trap-grid-editor">
+                    {Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, idx) => {
+                      const x = idx % GRID_SIZE;
+                      const y = Math.floor(idx / GRID_SIZE);
+                      const isStart = x === startPos.x && y === startPos.y;
+                      const isGoal = x === goalPos.x && y === goalPos.y;
+                      const trap = isTrap(x, y);
+                      
+                      let cls = 'trap-cell';
+                      if (isStart) cls += ' cell-start';
+                      else if (isGoal) cls += ' cell-goal';
+                      else if (trap) cls += ' cell-trap';
+                      
+                      return (
+                        <div 
+                          key={idx} 
+                          className={cls}
+                          onClick={() => mode === 'custom' && toggleCell(x, y)}
+                        >
+                          {isStart ? 'S' : isGoal ? 'G' : trap ? '💀' : ''}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div> {/* End left column */}
+
+            <div className="trap-panel-right">
+              {/* Live Preview */}
+              <div className="trap-preview">
+                <div className="trap-preview-label">Live Preview</div>
+                <div className="trap-preview-grid">
+                  {Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, idx) => {
+                    const x = idx % GRID_SIZE;
+                    const y = Math.floor(idx / GRID_SIZE);
+                    let isStart, isGoal;
+                    if(mode === 'preset'){
+                       isStart = x === 0 && y === 0;
+                       isGoal = x === 2 && y === 2;
+                    } else {
+                       isStart = x === startPos.x && y === startPos.y;
+                       isGoal = x === goalPos.x && y === goalPos.y;
+                    }
+                    const trap = isTrap(x, y);
+                    
+                    let cls = 'trap-preview-cell';
+                    if (isStart) cls += ' pv-start';
+                    else if (isGoal) cls += ' pv-goal';
+                    else if (trap) cls += ' pv-trap';
+
+                    return <div key={idx} className={cls} />;
+                  })}
+                </div>
               </div>
-            </div>
-          )}
 
-          {/* Live Preview */}
-          <div className="trap-preview">
-            <div className="trap-preview-label">Live Preview</div>
-            <div className="trap-preview-grid">
-              {Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, idx) => {
-                const x = idx % GRID_SIZE;
-                const y = Math.floor(idx / GRID_SIZE);
-                let isStart, isGoal;
-                if(mode === 'preset'){
-                   isStart = x === 0 && y === 0;
-                   isGoal = x === 2 && y === 2;
-                } else {
-                   isStart = x === startPos.x && y === startPos.y;
-                   isGoal = x === goalPos.x && y === goalPos.y;
-                }
-                const trap = isTrap(x, y);
-                
-                let cls = 'trap-preview-cell';
-                if (isStart) cls += ' pv-start';
-                else if (isGoal) cls += ' pv-goal';
-                else if (trap) cls += ' pv-trap';
-
-                return <div key={idx} className={cls} />;
-              })}
-            </div>
+              <button className="trap-apply-btn" onClick={applyConfig}>
+                Apply Configuration ({currentTraps.length} traps)
+              </button>
+            </div> {/* End right column */}
           </div>
-
-          <button className="trap-apply-btn" onClick={applyConfig}>
-            Apply Configuration ({currentTraps.length} traps)
-          </button>
         </div>
       )}
     </div>

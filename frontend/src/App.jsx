@@ -222,7 +222,7 @@ function App() {
               <div style={{gridColumn: '1 / -1', marginTop: '0.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)'}}>
                 <strong style={{color: 'var(--purple)', display:'block', marginBottom:'0.25rem'}}>Live Hash Entropy Field (Visualizer)</strong>
                 <span style={{color: 'var(--text-muted)'}}>
-                  This specific "Wow Factor" visualizes the literal SHA-256 bits of the cryptographic hash. When idle or computing, particles show chaotic entropy. Upon successful Verifier authentication, the chaotic entropy pulls into a stable, glowing ring, visually proving cryptographic convergence!
+                  The Live Hash Entropy Field is a real-time particle visualization of the protocol's cryptographic states. During the computation phases, the system maps the underlying data into a scattered particle cloud, representing unstructured cryptographic entropy. Upon successful zero-knowledge authentication, the mathematical proof converges, and the algorithm pulls the chaotic particles into a stable geometry—providing an intuitive, visual confirmation of true cryptographic parity between the Observer and Verifier.
                 </span>
               </div>
            </div>
